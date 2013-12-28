@@ -1,0 +1,7 @@
+References:
+
+https://en.wikipedia.org/wiki/K-nearest_neighbor_algorithm
+
+http://nlp.stanford.edu/IR-book/html/htmledition/k-nearest-neighbor-1.html
+
+https://en.wikipedia.org/wiki/Nearest_neighbor_search
