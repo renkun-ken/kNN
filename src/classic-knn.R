@@ -3,15 +3,18 @@ data <- read.csv("data/eurusd1.csv",header=F,stringsAsFactors=F)
 colnames(data) <- c("date","time","open","high","low","close","volume")
 plot(data$close,type="l")
 
-kpredict <- function(data,lens=seq(10,30),k=10) {
-  N <- length(data)
+kpredict <- function(data,lens=seq(10,15),k=10) {
+  n <- length(data)
   predict.df.list <- lapply(lens,function(len) {
-    series <- data[(N-len+1):N]
-    corr.df.list <- lapply(1:(N-len),function(i) {
-      data.frame(length=len,index=i,cor=cor(data[i:(i+len-1)],series),predict=data[i+len])
+    series <- data[(n-len+1):n]
+    corr.df.list <- lapply(1:(n-len),function(i) {
+      data.frame(length=len,
+                 index=i,
+                 cor=cor(data[i:(i+len-1)],series),
+                 predict=data[i+len])
     })
-    corr.df <- data.frame(do.call("rbind",corr.df.list))
-    corr <- corr.df[with(corr.df,order(abs(cor),decreasing=T)),][1:k,]
+    corr.df <- do.call("rbind",corr.df.list)
+    corr <- corr.df[with(corr.df,order(cor,decreasing=T)),][1:k,]
     # baseline adjustment
     predictor <- exp(corr$cor)*corr$predict/sum(exp(corr$cor))
     predict.sd <- sd(exp(corr$cor)*corr$predict/sum(exp(corr$cor)))
