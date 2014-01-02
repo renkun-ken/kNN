@@ -15,7 +15,8 @@ kpredict <- function(data,lens=seq(10,15),k=10) {
     })
     corr.df <- do.call("rbind",corr.df.list)
     corr <- corr.df[with(corr.df,order(cor,decreasing=T)),][1:k,]
-    # baseline adjustment
+    # baseline adjustment: scaling and shifting
+    # adjust for pattern and predictor as well
     predictor <- exp(corr$cor)*corr$predict/sum(exp(corr$cor))
     predict.sd <- sd(exp(corr$cor)*corr$predict/sum(exp(corr$cor)))
     data.frame(length=len,predict.sd=predict.sd)
