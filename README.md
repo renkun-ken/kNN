@@ -7,4 +7,5 @@ In pattern recognition, the k-nearest neighbors algorithm (k-NN) is a non-parame
 References
 ---------------------------
 https://en.wikipedia.org/wiki/K-nearest_neighbor_algorithm
+
 https://en.wikipedia.org/wiki/Nearest_neighbor_search
