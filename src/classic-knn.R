@@ -56,7 +56,9 @@ kpredict <- function(data,hs=seq(10,15),k=100,n.ahead=3,min.cor=0.5) {
   return(list(errors=errors,orders=orders,pred=result))
 }
 
-result <- kpredict(data[1:2000,"close"],hs=seq(100,120),k=60,n.ahead=15,min.cor=0.5)
+# demo code
+# change to test function to evaluate the performance of the predictive algorithm
+result <- kpredict(data[1:2000,"close"],hs=seq(100,120),k=60,n.ahead=15,min.cor=0.8)
 result$pred$estimate["pred",]-data[2001:2015,"close"]
 mean(abs(result$pred$estimate["pred",]-data[2001:2015,"close"]))
 cor(result$pred$estimate["pred",],data[2001:2015,"close"])
