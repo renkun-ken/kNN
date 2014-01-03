@@ -3,7 +3,8 @@ data <- read.csv("data/eurusd60.csv",header=F,stringsAsFactors=F)
 colnames(data) <- c("date","time","open","high","low","close","volume")
 plot(data$close,type="l")
 
-kpredictn <- function(data,k=10,h=10,n.ahead=5,min.cor=0.5) {
+kpredictn <- function(data,k=100,h=10,n.ahead=3,min.cor=0.5,
+                      output=c("predicts","estimate","error")) {
   n <- length(data)
   series <- data[(n-h+1):n]
   range <- 1:(n-h-n.ahead+1)
@@ -11,40 +12,51 @@ kpredictn <- function(data,k=10,h=10,n.ahead=5,min.cor=0.5) {
     pattern <- data[i:(i+h-1)]
     return(cor(pattern,series))
   })
-  abc.cors <- abs(cors)
-  orders <- order(abc.cors,decreasing=T)
-  indices <- range[orders<=k & abc.cors>=min.cor]
-  predicts <- lapply(indices,function(i) {
+  abs.cors <- abs(cors)
+  orders <- order(abs.cors,decreasing=T)
+  indices <- range[orders<=k & abs.cors>=min.cor]
+  
+  predicts <- t(sapply(indices,function(i) {
     pattern <- data[i:(i+h-1)]
     predictor <- data[(i+h):(i+h+n.ahead-1)]
     m <- lm(series~pattern)
     coeff <- coef(m)
-    # run a linear model to find slope and offset
     predictor <- coeff[[1]]+coeff[[2]]*predictor
     return(predictor)
+  }))
+  
+  corsi <- cors[indices]
+  abs.corsi <- abs(corsi)
+  estimate <- sapply(1:n.ahead,function(t) {
+    w <- exp(abs.corsi)
+    sumw <- sum(w)
+    preds <- w*predicts[,t]/sumw
+    pred <- sum(preds)
+    sd <- sd(preds)
+    rsd <- sd/abs(pred)
+    return(c(pred=pred,sd=sd,rsd=rsd))
   })
-  return(predicts)
+  error <- sum(estimate["sd",])
+  result <- list(predicts=predicts,estimate=estimate,error=error)
+  return(result[output])
 }
 
-kpredict <- function(data,lens=seq(10,15),k=10,n.ahead=1) {
+kpredict <- function(data,hs=seq(10,15),k=100,n.ahead=3,min.cor=0.5) {
   n <- length(data)
-  predict.df.list <- lapply(lens,function(len) {
-    series <- data[(n-len+1):n]
-    corr.df.list <- lapply(1:(n-len),function(i) {
-      data.frame(length=len,
-                 index=i,
-                 cor=cor(data[i:(i+len-1)],series),
-                 predict=data[i+len])
-    })
-    corr.df <- do.call("rbind",corr.df.list)
-    corr <- corr.df[with(corr.df,order(cor,decreasing=T)),][1:k,]
-    # baseline adjustment: scaling and shifting
-    # adjust for pattern and predictor as well
-    predictor <- exp(corr$cor)*corr$predict/sum(exp(corr$cor))
-    predict.sd <- sd(exp(corr$cor)*corr$predict/sum(exp(corr$cor)))
-    data.frame(length=len,predict.sd=predict.sd)
+  g <- length(hs)
+  groups <- 1:g
+  plist <- lapply(hs,function(h) {
+    predict <- kpredictn(data,h=h,k=k,n.ahead=n.ahead,min.cor=min.cor)
+    result <- c(list(h=h),predict)
+    return(result)
   })
-  predict.df<- do.call("rbind",predict.df.list)
-  result <- predict.df[with(predict.df,order(predict.sd)),]
-  result
+  errors <- sapply(groups,function(i)plist[[i]]$error)
+  orders <- order(errors)
+  result <- plist[[groups[orders==1]]]
+  return(list(errors=errors,orders=orders,pred=result))
 }
+
+result <- kpredict(data[1:2000,"close"],hs=seq(100,120),k=60,n.ahead=15,min.cor=0.5)
+result$pred$estimate["pred",]-data[2001:2015,"close"]
+mean(abs(result$pred$estimate["pred",]-data[2001:2015,"close"]))
+cor(result$pred$estimate["pred",],data[2001:2015,"close"])
