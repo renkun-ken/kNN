@@ -172,3 +172,5 @@ pip-log.txt
 .Rproj.user
 project.sublime-project
 project.sublime-workspace
+.RData
+.Rhistory
