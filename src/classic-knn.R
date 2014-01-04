@@ -83,8 +83,9 @@ kvalidate <- function(data,start,hs,k,n.ahead,min.cor=0,print.out=T) {
 # Issues
 # The predictor seems biased
 test <- function() {
-  result <- kvalidate(data[1:2000,"close"],1200,hs=seq(30,40),k=300,n.ahead=1,min.cor=0)
-  par(mfrow=c(2,1))
+  result <- kvalidate(data[1:2000,"close"],1200,
+                      hs=seq(30,40),k=300,n.ahead=1,min.cor=0)
+  par(mfrow=c(1,2))
   plot(density(result$mde),main="MDE")
   plot(density(result$made),main="MADE")
 }
