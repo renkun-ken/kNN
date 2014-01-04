@@ -3,7 +3,7 @@ data <- read.csv("data/eurusd60.csv",header=F,stringsAsFactors=F)
 colnames(data) <- c("date","time","open","high","low","close","volume")
 plot(data$close,type="l")
 
-kpredictn <- function(data,k=100,h=10,n.ahead=3,min.cor=0.5,
+kpredictn <- function(data,k,h,n.ahead,min.cor=0,
                       output=c("predicts","estimate","error")) {
   n <- length(data)
   series <- data[(n-h+1):n]
@@ -41,7 +41,7 @@ kpredictn <- function(data,k=100,h=10,n.ahead=3,min.cor=0.5,
   return(result[output])
 }
 
-kpredict <- function(data,hs=seq(10,15),k=100,n.ahead=3,min.cor=0.5) {
+kpredict <- function(data,hs,k,n.ahead=1,min.cor=0) {
   n <- length(data)
   g <- length(hs)
   groups <- 1:g
@@ -56,9 +56,22 @@ kpredict <- function(data,hs=seq(10,15),k=100,n.ahead=3,min.cor=0.5) {
   return(list(errors=errors,orders=orders,pred=result))
 }
 
-# demo code
-# change to test function to evaluate the performance of the predictive algorithm
-result <- kpredict(data[1:2000,"close"],hs=seq(100,120),k=60,n.ahead=15,min.cor=0.8)
-result$pred$estimate["pred",]-data[2001:2015,"close"]
-mean(abs(result$pred$estimate["pred",]-data[2001:2015,"close"]))
-cor(result$pred$estimate["pred",],data[2001:2015,"close"])
+kvalidate <- function(data,start,hs,k,n.ahead,min.cor=0,print.out=T) {
+  n <- length(data)
+  range <- start:(n-n.ahead)
+  valid <- sapply(range,function(i) {
+    vdata <- data[1:i]
+    result <- kpredict(vdata,hs=hs,k=k,n.ahead=n.ahead,min.cor=min.cor)
+    pred <- result$pred$estimate["pred",]
+    actual <- data[(i+1):(i+n.ahead)]
+    residuals <- pred-actual
+    mde <- mean(residuals)
+    made <- mean(abs(residuals))
+    cor <- cor(pred,actual)
+    if(print.out) {
+      print(i)
+    }
+    return(c(mde=mde,made=made,cor=cor))
+  })
+  return(data.frame(t(valid)))
+}
