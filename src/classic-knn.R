@@ -1,7 +1,10 @@
 # Classic k-nearest neighbor algorithms
-data <- read.csv("data/eurusd60.csv",header=F,stringsAsFactors=F)
-colnames(data) <- c("date","time","open","high","low","close","volume")
-plot(data$close,type="l")
+loadData <- function() {
+  data <- read.csv("data/eurusd60.csv",header=F,stringsAsFactors=F)
+  colnames(data) <- c("date","time","open","high","low","close","volume")
+  plot(data$close,type="l")
+}
+
 
 kpredictn <- function(data,k,h,n.ahead,min.cor=0,
                       output=c("predicts","estimate","error")) {
@@ -56,6 +59,7 @@ kpredict <- function(data,hs,k,n.ahead=1,min.cor=0) {
   return(list(errors=errors,orders=orders,pred=result))
 }
 
+# TODO: parallelize the method by passing functions as arguments
 kvalidate <- function(data,start,hs,k,n.ahead,min.cor=0,print.out=T) {
   n <- length(data)
   range <- start:(n-n.ahead)
@@ -75,3 +79,13 @@ kvalidate <- function(data,start,hs,k,n.ahead,min.cor=0,print.out=T) {
   })
   return(data.frame(t(valid)))
 }
+
+# Issues
+# The predictor seems biased
+test <- function() {
+  result <- kvalidate(data[1:2000,"close"],1200,hs=seq(30,40),k=300,n.ahead=1,min.cor=0)
+  par(mfrow=c(2,1))
+  plot(density(result$mde),main="MDE")
+  plot(density(result$made),main="MADE")
+}
+
