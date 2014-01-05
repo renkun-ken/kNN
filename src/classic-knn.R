@@ -1,39 +1,20 @@
 # Classic k-nearest neighbor algorithms
-# aggregate random data generator
-loadData1 <- function() {
-  data <- read.csv("data/eurusd60.csv",header=F,stringsAsFactors=F)
-  colnames(data) <- c("date","time","open","high","low","close","volume")
-  par(mfrow=c(1,1))
-  plot(data$close,type="l")
-}
-
-loadData2 <- function() {
-  t <- 1:1000
-  data <- 10*sin(t/50*pi)
-  par(mfrow=c(1,1))
-  plot(data,type="l")
+readData <- function(src,col,reader=read.csv,
+                     header=FALSE,stringAsFactors=FALSE,
+                     plot=TRUE,...) {
+  data <- reader(src,header=header,stringAsFactors=stringAsFactors,...)
+  if(plot) plot(data,type="l")
   return(data)
 }
 
-loadData3 <- function() {
-  t <- 1:1000
-  data <- as.numeric(arima.sim(list(ar=c(0.95),
-                                    ma=c(0,2.0,-1.0)),n=1000))
-  par(mfrow=c(1,1))
-  plot(data,type="l")
+simData <- function(n=NA,fun=rnorm,args=list(),plot=T) {
+  if(is.numeric(n)) {
+    data <- as.numeric(do.call(fun,c(n=n,args)))
+  } else {
+    data <- as.numeric(do.call(fun,args))
+  }  
+  if(plot) plot(data,type="l")
   return(data)
-}
-
-loadWN <- function(n) {
-  t <- 1:n
-  data <- rnorm(n)
-  par(mfrow=c(1,1))
-  plot(data,type="l")
-  return(data)
-}
-
-generateData <- function(n,type) {
-  # generate all types of data
 }
 
 kpredictn <- function(data,k,h,n.ahead,min.cor=0,

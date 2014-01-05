@@ -174,3 +174,5 @@ project.sublime-project
 project.sublime-workspace
 .RData
 .Rhistory
+kNN.sublime-project
+kNN.sublime-workspace
