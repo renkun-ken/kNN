@@ -112,4 +112,5 @@ kAnalyze <- function(result) {
   par(mfrow=c(2,2))
   summary(m)
   plot(m)
+  return(m)
 }
