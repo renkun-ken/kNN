@@ -114,3 +114,5 @@ kAnalyze <- function(result) {
   plot(m)
   return(m)
 }
+
+#TODO: Add ARIMA simulation and step-wise ARIMA model fit.
