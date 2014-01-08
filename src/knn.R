@@ -36,9 +36,11 @@ kPredicts <- function(data,hs,k,n.ahead=1,min.cor=0) {
     predicts <- t(sapply(indices,function(i) {
       pattern <- data[i:(i+h-1)]
       predictor <- data[(i+h):(i+h+n.ahead-1)]
-      m <- local.model(series~pattern)
+      m <- local.model(series~pattern+I(pattern^2))
       coeff <- coef(m)
-      predictor <- coeff[[1]]+coeff[[2]]*predictor
+      predictor <- coeff[[1]]+
+        coeff[[2]]*predictor+
+        coeff[[3]]*predictor^2
       return(predictor)
     }))
     
@@ -88,7 +90,8 @@ kValidate <- function(data,start,hs,k,n.ahead,min.cor=0,print.out=T) {
     if(print.out) {
       print(i)
     }
-    return(c(pred,actual=actual,mde=mde,made=made,cor=cor))
+    return(c(pred,actual=actual,error=residuals,
+             mde=mde,made=made,cor=cor))
   })
   return(data.frame(t(valid)))
 }
@@ -108,7 +111,7 @@ kPlot <- function(result) {
 
 # analyze the performance of the results
 kAnalyze <- function(result) {
-  m <- lm(actual~pred,data=result)
+  m <- lm(actual~pred+0,data=result)
   par(mfrow=c(2,2))
   summary(m)
   plot(m)
