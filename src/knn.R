@@ -17,52 +17,52 @@ simData <- function(n=NA,fun=rnorm,args=list(),plot=T) {
   return(data)
 }
 
-kPredict <- function(data,k,h,n.ahead,min.cor=0,
-                      output=c("predicts","estimate","error"),
-                      scaler=lm) {
-  n <- length(data)
-  series <- data[(n-h+1):n]
-  range <- 1:(n-h-n.ahead+1)
-  cors <- sapply(range,function(i) {
-    pattern <- data[i:(i+h-1)]
-    return(cor(pattern,series))
-  })
-  abs.cors <- abs(cors)
-  orders <- order(abs.cors,decreasing=T)
-  # FIXME: orders <= k does not gurantee the number of nearest neighbors.
-  indices <- range[orders<=k & abs.cors>=min.cor]
-  
-  predicts <- t(sapply(indices,function(i) {
-    pattern <- data[i:(i+h-1)]
-    predictor <- data[(i+h):(i+h+n.ahead-1)]
-    m <- scaler(series~pattern)
-    coeff <- coef(m)
-    predictor <- coeff[[1]]+coeff[[2]]*predictor
-    return(predictor)
-  }))
-  
-  corsi <- cors[indices]
-  abs.corsi <- abs(corsi)
-  estimate <- sapply(1:n.ahead,function(t) {
-    w <- exp(abs.corsi)
-    sumw <- sum(w)
-    preds <- w*predicts[,t]/sumw
-    pred <- sum(preds)
-    sd <- sd(preds)
-    rsd <- sd/abs(pred)
-    return(c(pred=pred,sd=sd,rsd=rsd))
-  })
-  error <- sum(estimate["sd",])
-  result <- list(predicts=predicts,estimate=estimate,error=error)
-  return(result[output])
-}
-
 kPredicts <- function(data,hs,k,n.ahead=1,min.cor=0) {
+  kPredict <- function(data,k,h,n.ahead,min.cor=0,
+                       output=c("predicts","estimate","error"),
+                       local.model=lm) {
+    n <- length(data)
+    series <- data[(n-h+1):n]
+    range <- 1:(n-h-n.ahead+1)
+    cors <- sapply(range,function(i) {
+      pattern <- data[i:(i+h-1)]
+      return(cor(pattern,series))
+    })
+    abs.cors <- abs(cors)
+    orders <- order(abs.cors,decreasing=T)
+    # FIXME: orders <= k does not gurantee the number of nearest neighbors.
+    indices <- range[orders<=k & abs.cors>=min.cor]
+    
+    predicts <- t(sapply(indices,function(i) {
+      pattern <- data[i:(i+h-1)]
+      predictor <- data[(i+h):(i+h+n.ahead-1)]
+      m <- local.model(series~pattern)
+      coeff <- coef(m)
+      predictor <- coeff[[1]]+coeff[[2]]*predictor
+      return(predictor)
+    }))
+    
+    corsi <- cors[indices]
+    abs.corsi <- abs(corsi)
+    estimate <- sapply(1:n.ahead,function(t) {
+      w <- exp(abs.corsi)
+      sumw <- sum(w)
+      preds <- w*predicts[,t]/sumw
+      pred <- sum(preds)
+      sd <- sd(preds)
+      rsd <- sd/abs(pred)
+      return(c(pred=pred,sd=sd,rsd=rsd))
+    })
+    error <- sum(estimate["sd",])
+    result <- list(predicts=predicts,estimate=estimate,error=error)
+    return(result[output])
+  }
+  
   n <- length(data)
   g <- length(hs)
   groups <- 1:g
   plist <- lapply(hs,function(h) {
-    predict <- kpredictn(data,h=h,k=k,n.ahead=n.ahead,min.cor=min.cor)
+    predict <- kPredict(data,h=h,k=k,n.ahead=n.ahead,min.cor=min.cor)
     result <- c(list(h=h),predict)
     return(result)
   })
@@ -78,7 +78,7 @@ kValidate <- function(data,start,hs,k,n.ahead,min.cor=0,print.out=T) {
   range <- start:(n-n.ahead)
   valid <- sapply(range,function(i) {
     vdata <- data[1:i]
-    result <- kpredict(vdata,hs=hs,k=k,n.ahead=n.ahead,min.cor=min.cor)
+    result <- kPredicts(vdata,hs=hs,k=k,n.ahead=n.ahead,min.cor=min.cor)
     pred <- result$pred$estimate["pred",]
     actual <- data[(i+1):(i+n.ahead)]
     residuals <- actual-pred
