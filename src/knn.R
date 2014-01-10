@@ -12,7 +12,7 @@ simData <- function(n=NA,fun=rnorm,args=list(),plot=T) {
     data <- as.numeric(do.call(fun,c(n=n,args)))
   } else {
     data <- as.numeric(do.call(fun,args))
-  }  
+  }
   if(plot) plot(data,type="l")
   return(data)
 }
@@ -32,7 +32,7 @@ kPredicts <- function(data,hs,k,n.ahead=1,min.cor=0) {
     orders <- order(abs.cors,decreasing=T)
     # FIXME: orders <= k does not gurantee the number of nearest neighbors.
     indices <- range[orders<=k & abs.cors>=min.cor]
-    
+
     predicts <- t(sapply(indices,function(i) {
       pattern <- data[i:(i+h-1)]
       predictor <- data[(i+h):(i+h+n.ahead-1)]
@@ -43,7 +43,7 @@ kPredicts <- function(data,hs,k,n.ahead=1,min.cor=0) {
         coeff[[3]]*predictor^2
       return(predictor)
     }))
-    
+
     corsi <- cors[indices]
     abs.corsi <- abs(corsi)
     estimate <- sapply(1:n.ahead,function(t) {
@@ -59,7 +59,7 @@ kPredicts <- function(data,hs,k,n.ahead=1,min.cor=0) {
     result <- list(predicts=predicts,estimate=estimate,error=error)
     return(result[output])
   }
-  
+
   n <- length(data)
   g <- length(hs)
   groups <- 1:g
