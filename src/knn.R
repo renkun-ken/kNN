@@ -90,7 +90,7 @@ kValidate <- function(data,start,hs,k,n.ahead,min.cor=0,print.out=T) {
     if(print.out) {
       print(i)
     }
-    # create a named vector
+    
     return(c(pred,actual=actual,error=residuals,
              mde=mde,made=made,cor=cor))
   })
@@ -121,3 +121,4 @@ kAnalyze <- function(result) {
 
 #TODO: Add ARIMA simulation and step-wise ARIMA model fit.
 #TODO: kNN as a binary classifier to predict whether the stock price will go up or down
+#TODO: Some generic KNN algorithm
