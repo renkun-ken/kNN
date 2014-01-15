@@ -90,6 +90,7 @@ kValidate <- function(data,start,hs,k,n.ahead,min.cor=0,print.out=T) {
     if(print.out) {
       print(i)
     }
+    # create a named vector
     return(c(pred,actual=actual,error=residuals,
              mde=mde,made=made,cor=cor))
   })
