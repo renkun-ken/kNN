@@ -119,18 +119,6 @@ kAnalyze <- function(result) {
   return(m)
 }
 
-kTest <- function(arg){
-  # this is only a test
-}
 
 #TODO: Add ARIMA simulation and step-wise ARIMA model fit.
 #TODO: kNN as a binary classifier to predict whether the stock price will go up or down
-#TODO: Some generic KNN algorithm
-testFun <- function(msg) {
-  # print the message
-  print(msg)
-}
-
-testFun2 <- function(msg,times) {
-  print(paste(rep(msg,times),sep="|"))
-}
