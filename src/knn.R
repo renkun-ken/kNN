@@ -132,5 +132,5 @@ testFun <- function(msg) {
 }
 
 testFun2 <- function(msg,times) {
-  print(paste(rep(msg,times),sep=","))
+  print(paste(rep(msg,times),sep="|"))
 }
