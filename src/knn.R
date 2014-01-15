@@ -126,3 +126,7 @@ kTest <- function(arg){
 #TODO: Add ARIMA simulation and step-wise ARIMA model fit.
 #TODO: kNN as a binary classifier to predict whether the stock price will go up or down
 #TODO: Some generic KNN algorithm
+testFun <- function(msg) {
+  # print the message
+  print(msg)
+}
