@@ -130,3 +130,7 @@ testFun <- function(msg) {
   # print the message
   print(msg)
 }
+
+testFun2 <- function(msg,times) {
+  print(paste(rep(msg,times),sep=","))
+}
